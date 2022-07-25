@@ -1,0 +1,4 @@
+1--)Dynamic date null geliyor excelden insert atınca.
+2--)Bağlantı ve tablo isimlerini nota al yada app.config içine
+3--)Yazdırılanları datatableda listele checked
+4--)etiket dizaynı program üzerinden değişiyor mu kontrol et checked

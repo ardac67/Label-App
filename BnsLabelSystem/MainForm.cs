@@ -1,14 +1,10 @@
-﻿using DevExpress.XtraPrinting;
-using DevExpress.XtraReports.UI;
+﻿using DevExpress.XtraReports.UI;
 using ExcelDataReader;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Text;
 using Z.Dapper.Plus;
-using DevExpress.XtraReports.Configuration;
-using DevExpress.XtraReports.UI;
-using DevExpress.XtraPrinting.Preview;
 using System.Configuration;
 
 namespace BnsLabelSystem
@@ -18,7 +14,9 @@ namespace BnsLabelSystem
         public MainForm()
         {
             InitializeComponent();
-           
+            ReadErrorLog();
+
+
             checkEdit1.Enabled = false;
             checkEdit2.Enabled = false;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -141,6 +139,9 @@ namespace BnsLabelSystem
         {
             try
             {
+                checkEdit1.Checked = false;
+                checkEdit2.Checked = false;
+                checkEdit3.Checked = false;
                 SqlConnection connection = new SqlConnection(connectionstring);
 
                 connection.Open();
@@ -244,11 +245,11 @@ namespace BnsLabelSystem
             try
             {
                 Dm report = new Dm();
-                if (GetDataFromTable(textBox1.Text)!=null)
+                if (GetDataFromTable(Barcode) !=null)
                 {
-                    if (GetDataFromTable(textBox1.Text).Rows.Count > 0) 
+                    if (GetDataFromTable(Barcode).Rows.Count > 0) 
                     {
-                        report.DataSource = GetDataFromTable(textEdit1.Text);
+                        report.DataSource = GetDataFromTable(Barcode);
                         ReportPrintTool printTool = new ReportPrintTool(report);
                         if (checkEdit4.Checked)
                         {
@@ -258,6 +259,8 @@ namespace BnsLabelSystem
                         {
                             report.PrintingSystem.EndPrint += PrintingSystem_EndPrint;
                             printTool.Print();
+                            
+
 
                         }
                     }
@@ -291,7 +294,7 @@ namespace BnsLabelSystem
             try
             {
                 NoDM report = new NoDM();
-                report.DataSource = GetDataFromTable(textEdit1.Text);
+                report.DataSource = GetDataFromTable(Barcode);
                 ReportPrintTool printTool = new ReportPrintTool(report);
                 if (checkEdit4.Checked)
                 {
@@ -310,7 +313,7 @@ namespace BnsLabelSystem
            
 
         }
-        private DataTable GetDataFromTable(string Barcode)
+        private DataTable GetDataFromTable(string arcode)
         {
             try
             {
@@ -324,7 +327,7 @@ namespace BnsLabelSystem
 
                 SqlCommand selectCommand = new SqlCommand(cmdText, connection);
 
-                selectCommand.Parameters.Add("@EAN", SqlDbType.NVarChar).Value = Barcode;
+                selectCommand.Parameters.Add("@EAN", SqlDbType.NVarChar).Value = arcode;
 
                 sqlConnection.Open();
 
@@ -349,8 +352,13 @@ namespace BnsLabelSystem
         }
         private void PrintingSystem_EndPrint(object sender, EventArgs e)
         {
+
             WriteToFile(GetDataFromTable(textEdit1.Text));
             IsPrintedControlMethod();
+            checkEdit3.Checked = true;
+            WriteToTableWhenPrinted(textEdit1.Text);
+            PrintedLabels();
+           
         }
         public void WriteToFile(DataTable dataTable)
         {
@@ -390,6 +398,8 @@ namespace BnsLabelSystem
                                 }
                                 sw.Write(array[i].ToString());
                                 sw.WriteLine("=>>>>" + DateTime.Now);
+                                sw.Write("----------------");
+                                sw.Write("\n");
 
                             }
                         }
@@ -418,6 +428,8 @@ namespace BnsLabelSystem
                                 }
                                 sw.Write(array[i].ToString());
                                 sw.WriteLine("=>>>>" + DateTime.Now);
+                                sw.Write("----------------");
+                                sw.Write("\n");
 
                             }
                         }
@@ -445,6 +457,8 @@ namespace BnsLabelSystem
                     using (StreamWriter sw = File.CreateText(filepath))
                     {
                         sw.WriteLine(Message + " " + DateTime.Now);
+                        sw.Write("----------------");
+                        sw.Write("\n");
                     }
                 }
                 else
@@ -452,6 +466,8 @@ namespace BnsLabelSystem
                     using (StreamWriter sw = File.AppendText(filepath))
                     {
                         sw.WriteLine(Message + " " + DateTime.Now);
+                        sw.Write("----------------");
+                        sw.Write("\n");
                     }
                 }
             }
@@ -488,6 +504,63 @@ namespace BnsLabelSystem
                 WriteToFileError(ex.Message);
             }
         }
-        private void PrintedLabel() { }
+        private void PrintedLabels()
+        {
+            try
+            {
+                using (SqlConnection cnn = new SqlConnection(connectionstring))
+                {
+                    SqlCommand command = new SqlCommand("SELECT * FROM ztPrintedLabels", cnn);
+                    command.CommandType = CommandType.Text;
+                    DataTable dt = new DataTable();
+                    SqlDataAdapter da = new SqlDataAdapter(command);
+                    da.Fill(dt);
+                    da.Dispose();
+                    dataGridView2.DataSource = dt;
+                }
+            }
+            catch(Exception ex)
+            {
+                WriteToFileError(ex.Message);
+            }
+
+        }
+        private void WriteToTableWhenPrinted(string Barcode)
+        {
+            try
+            {
+                using (SqlConnection cnn = new SqlConnection(connectionstring))
+                {
+                    cnn.Open();
+                    SqlCommand command = new SqlCommand("INSERT INTO ztPrintedLabels SELECT Barcode=EAN,Article=Article,Dimension=Dimension,Color=Color,CONVERT(date,GETDATE()) FROM ztBNSLabel WHERE EAN=@EAN", cnn);
+                    command.CommandType = CommandType.Text;
+                    command.Parameters.Add("@EAN", SqlDbType.VarChar).Value = Barcode;
+                    command.ExecuteNonQuery();
+                }
+                
+            }
+            catch(Exception ex)
+            {
+                WriteToFileError(ex.Message);
+            }
+        }
+        private void ReadErrorLog()
+        {   
+            
+            try
+            {
+                if (!File.Exists(AppDomain.CurrentDomain.BaseDirectory + "\\Errors\\ErrorLog" + DateTime.Now.Date.ToShortDateString().Replace('/', '_') + ".txt"))
+                {
+                    File.Create(AppDomain.CurrentDomain.BaseDirectory + "\\Errors\\ErrorLog" + DateTime.Now.Date.ToShortDateString().Replace('/', '_') + ".txt");
+                }
+                textBox2.Text = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "\\Errors\\ErrorLog" + DateTime.Now.Date.ToShortDateString().Replace('/', '_') + ".txt");
+            }
+            catch(Exception ex)
+            {
+                WriteToFileError(ex.Message);
+            }
+           
+        }
+       
     }
 }

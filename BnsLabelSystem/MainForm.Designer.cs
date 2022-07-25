@@ -429,9 +429,9 @@
             // groupControl3
             // 
             this.groupControl3.Controls.Add(this.dataGridView2);
-            this.groupControl3.Location = new System.Drawing.Point(6, 224);
+            this.groupControl3.Location = new System.Drawing.Point(407, 6);
             this.groupControl3.Name = "groupControl3";
-            this.groupControl3.Size = new System.Drawing.Size(395, 187);
+            this.groupControl3.Size = new System.Drawing.Size(375, 398);
             this.groupControl3.TabIndex = 2;
             this.groupControl3.Text = "Yazdırılan Ürünler";
             // 
@@ -440,30 +440,28 @@
             this.dataGridView2.AllowUserToAddRows = false;
             this.dataGridView2.AllowUserToDeleteRows = false;
             this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridView2.Location = new System.Drawing.Point(2, 23);
             this.dataGridView2.Name = "dataGridView2";
             this.dataGridView2.ReadOnly = true;
             this.dataGridView2.RowTemplate.Height = 25;
-            this.dataGridView2.Size = new System.Drawing.Size(391, 162);
+            this.dataGridView2.Size = new System.Drawing.Size(368, 370);
             this.dataGridView2.TabIndex = 0;
             // 
             // groupControl2
             // 
             this.groupControl2.Controls.Add(this.textBox2);
-            this.groupControl2.Location = new System.Drawing.Point(409, 3);
+            this.groupControl2.Location = new System.Drawing.Point(8, 224);
             this.groupControl2.Name = "groupControl2";
-            this.groupControl2.Size = new System.Drawing.Size(375, 410);
+            this.groupControl2.Size = new System.Drawing.Size(395, 183);
             this.groupControl2.TabIndex = 1;
             this.groupControl2.Text = "Hata Raporu";
             // 
             // textBox2
             // 
-            this.textBox2.Enabled = false;
             this.textBox2.Location = new System.Drawing.Point(5, 26);
             this.textBox2.Multiline = true;
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(365, 379);
+            this.textBox2.Size = new System.Drawing.Size(385, 154);
             this.textBox2.TabIndex = 2;
             // 
             // groupControl1
